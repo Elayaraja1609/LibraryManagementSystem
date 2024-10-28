@@ -1,0 +1,446 @@
+openapi: 3.0.1
+info:
+  title: Library Management System
+  version: v1
+paths:
+  /v1/admin/authors:
+    get:
+      tags:
+        - Author
+      summary: Get all authors
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Author
+      summary: Add a new author
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/AuthorDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/AuthorDto'
+      responses:
+        '200':
+          description: OK
+  '/v1/admin/authors/{id}':
+    put:
+      tags:
+        - Author
+      summary: Update an existing author
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/AuthorDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/AuthorDto'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+        - Author
+      summary: Delete an author
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+  /v1/admin/books:
+    get:
+      tags:
+        - Book
+      summary: Get all books
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Book
+      summary: Add a new book
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookDtos'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/BookDtos'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/BookDtos'
+      responses:
+        '200':
+          description: OK
+  '/v1/admin/books/{id}':
+    put:
+      tags:
+        - Book
+      summary: Update an existing book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookDtos'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/BookDtos'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/BookDtos'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+        - Book
+      summary: Delete a book
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+  /v1/admin/search-book:
+    get:
+      tags:
+        - Book
+      summary: Search books
+      parameters:
+        - name: keyword
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /v1/admin/users:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - User
+      summary: Add a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDtos'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/UserDtos'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/UserDtos'
+      responses:
+        '200':
+          description: OK
+  '/v1/admin/users/{id}':
+    put:
+      tags:
+        - User
+      summary: Update an existing user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDtos'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/UserDtos'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/UserDtos'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+        - User
+      summary: Delete a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+  /v1/auth/login:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: OK
+  '/v1/users/overdue-books/{currentDate}':
+    get:
+      tags:
+        - Users
+      parameters:
+        - name: currentDate
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+  /v1/users/borrow-book:
+    post:
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionDtos'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/TransactionDtos'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/TransactionDtos'
+      responses:
+        '200':
+          description: OK
+  /v1/users/return-book:
+    post:
+      tags:
+        - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionDtos'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/TransactionDtos'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/TransactionDtos'
+      responses:
+        '200':
+          description: OK
+  /v1/users/search-book:
+    get:
+      tags:
+        - Users
+      parameters:
+        - name: keyword
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    AuthorDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        dob:
+          type: string
+          format: date-time
+          nullable: true
+        image:
+          type: string
+          nullable: true
+      additionalProperties: false
+    BookDtos:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        title:
+          type: string
+          nullable: true
+        isbn:
+          type: string
+          nullable: true
+        price:
+          type: number
+          format: double
+        image:
+          type: string
+          nullable: true
+        pageCount:
+          type: integer
+          format: int32
+        publishedYear:
+          type: string
+          format: date-time
+          nullable: true
+        publisher:
+          type: string
+          nullable: true
+        authorId:
+          type: integer
+          format: int32
+          nullable: true
+        authorName:
+          type: string
+          nullable: true
+        categoryId:
+          type: integer
+          format: int32
+          nullable: true
+        categoryName:
+          type: string
+          nullable: true
+        bookQty:
+          type: integer
+          format: int32
+        isAvailable:
+          type: boolean
+      additionalProperties: false
+    LoginDto:
+      type: object
+      properties:
+        username:
+          type: string
+          nullable: true
+        password:
+          type: string
+          nullable: true
+      additionalProperties: false
+    TransactionDtos:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        transactionDate:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+        returnDate:
+          type: string
+          format: date-time
+          nullable: true
+        bookId:
+          type: integer
+          format: int32
+        bookName:
+          type: string
+          nullable: true
+        userId:
+          type: integer
+          format: int32
+        userName:
+          type: string
+          nullable: true
+        status:
+          type: boolean
+      additionalProperties: false
+    UserDtos:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        firstname:
+          type: string
+          nullable: true
+        lastname:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        password:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        contact:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        roleId:
+          type: integer
+          format: int32
+          nullable: true
+        active:
+          type: boolean
+      additionalProperties: false
+  securitySchemes:
+    oauth2:
+      type: apiKey
+      name: Authorization
+      in: header
