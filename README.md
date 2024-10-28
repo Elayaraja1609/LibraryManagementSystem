@@ -47,11 +47,14 @@ Follow these steps to set up the project locally.
 dotnet ef migrations add InitialCreate
 dotnet ef database update
 ~~~
-4) ### Run the Project:
+4) ### Run SQL File:
+In SQL Server Management Studio, open `lms_sp_execute_file.sql`, select the appropriate database, and run the script.
+
+5) ### Run the Project:
 ~~~bash
 dotnet run
 ~~~
-5) ### Access Swagger for API Documentation:
+6) ### Access Swagger for API Documentation:
 * Navigate to `http://localhost:5273/swagger` to view and test the API endpoints.
 
 ## Default Seeded Data
