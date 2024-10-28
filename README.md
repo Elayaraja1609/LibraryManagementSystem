@@ -68,6 +68,3 @@ The application starts with some default categories, such as Fiction, Non-Fictio
     * PUT /v1/admin/books/{id}: Update an existing book.
     * DELETE /v1/admin/books/{id}: Delete a book by ID.
 * This will display the full Swagger UI with detailed API documentation, including all available endpoints, request and response structures, and sample data.
-
-## Contributing
-Contributions are welcome! Feel free to submit a pull request or open an issue to discuss improvements or report bugs.
