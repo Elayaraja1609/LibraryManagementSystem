@@ -14,13 +14,14 @@ namespace LMS.Controllers
 		private readonly ITransactionService _bookTransService;
 		private readonly IBookService _bookService;
 		private readonly IUserServices _userService;
+
 		public UsersController(ITransactionService bookTransService, IBookService bookService, IUserServices userService)
 		{
 			_bookTransService = bookTransService;
 			_bookService = bookService;
 			_userService = userService;
 		}
-		
+
 		[HttpGet("overdue-books/{currentDate}")]
 		public async Task<IActionResult> CheckOverdueBooks([FromRoute] DateTime currentDate)
 		{
@@ -43,23 +44,25 @@ namespace LMS.Controllers
 				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to check overdue: " + ex.Message);
 			}
 		}
-		[HttpPost("borrow-book")]
-		public async Task<IActionResult> BorrowBook([FromBody] TransactionDtos newTrans)
+
+		[HttpPost("borrow-books")]
+		public async Task<IActionResult> BorrowBooks([FromBody] List<TransactionDtos> borrowRequests)
 		{
-			if (newTrans == null)
+			if (borrowRequests == null || !borrowRequests.Any())
 			{
-				return BadRequest("Transaction details cannot be null.");
+				return BadRequest("Transaction details cannot be null or empty.");
 			}
 
 			try
 			{
-				var id = await _bookTransService.BorrowBookAsync(newTrans.UserId, newTrans.BookId, newTrans.TransactionDate, newTrans.DueDate);
-				if (id == "Book borrowed successfully.")
+				var tasks = borrowRequests.Select(async request =>
 				{
-					return Ok("Book borrowed successfully.");
-				}
+					return await _bookTransService.BorrowBookAsync(request.UserId, request.BookId, request.TransactionDate, request.DueDate);
+				});
 
-				return StatusCode(StatusCodes.Status500InternalServerError, id);
+				var results = await Task.WhenAll(tasks);
+
+				return Ok(results);
 			}
 			catch (LMSException ex)
 			{
@@ -67,26 +70,28 @@ namespace LMS.Controllers
 			}
 			catch (Exception ex)
 			{
-				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to borrow the book: " + ex.Message);
+				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to borrow books: " + ex.Message);
 			}
 		}
-		[HttpPost("return-book")]
-		public async Task<IActionResult> ReturnBook([FromBody] TransactionDtos newTrans)
+
+		[HttpPost("return-books")]
+		public async Task<IActionResult> ReturnBooks([FromBody] List<TransactionDtos> returnRequests)
 		{
-			if (newTrans == null)
+			if (returnRequests == null || !returnRequests.Any())
 			{
-				return BadRequest("Transaction details cannot be null.");
+				return BadRequest("Transaction details cannot be null or empty.");
 			}
 
 			try
 			{
-				var id = await _bookTransService.ReturnBookAsync(newTrans.UserId, newTrans.BookId, (DateTime)newTrans.ReturnDate);
-				if (id == "Book returned successfully.")
+				var tasks = returnRequests.Select(async request =>
 				{
-					return Ok("Book returned successfully.");
-				}
+					return await _bookTransService.ReturnBookAsync(request.UserId, request.BookId, (DateTime)request.ReturnDate);
+				});
 
-				return StatusCode(StatusCodes.Status500InternalServerError, id);
+				var results = await Task.WhenAll(tasks);
+
+				return Ok(results);
 			}
 			catch (LMSException ex)
 			{
@@ -94,9 +99,10 @@ namespace LMS.Controllers
 			}
 			catch (Exception ex)
 			{
-				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to return the book: " + ex.Message);
+				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to return books: " + ex.Message);
 			}
 		}
+
 		[HttpGet("search-book")]
 		public async Task<IActionResult> SearchBooks([FromQuery] string keyword)
 		{
@@ -123,7 +129,6 @@ namespace LMS.Controllers
 			{
 				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to search for books: " + ex.Message);
 			}
-
 		}
 	}
 }

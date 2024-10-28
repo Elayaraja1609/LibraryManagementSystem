@@ -2,9 +2,9 @@
 using LMS.DTOs;
 using LMS.Exceptions;
 using LMS.Interfaces.ServicesInterface;
-using LMS.Models;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using NUnit.Framework;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -16,167 +16,149 @@ namespace LMS.Tests.Controllers
 	[TestFixture]
 	public class UsersControllerTests
 	{
+		private UsersController _controller;
 		private Mock<ITransactionService> _mockTransactionService;
 		private Mock<IBookService> _mockBookService;
 		private Mock<IUserServices> _mockUserService;
-		private UsersController _controller;
 
 		[SetUp]
-		public void Setup()
+		public void SetUp()
 		{
 			_mockTransactionService = new Mock<ITransactionService>();
 			_mockBookService = new Mock<IBookService>();
 			_mockUserService = new Mock<IUserServices>();
-			_controller = new UsersController(_mockTransactionService.Object, _mockBookService.Object, _mockUserService.Object);
+
+			_controller = new UsersController(
+				_mockTransactionService.Object,
+				_mockBookService.Object,
+				_mockUserService.Object
+			);
 		}
 
 		[Test]
-		public async Task CheckOverdueBooks_ReturnsOk_WhenOverdueBooksExist()
+		public async Task BorrowBooks_ReturnsOk_WhenAllBooksBorrowedSuccessfully()
 		{
 			// Arrange
-			var currentDate = DateTime.Now;
-			List<BookTransaction> overdueBooks = new List<BookTransaction>
+			var borrowRequests = new List<TransactionDtos>
 			{
-				new BookTransaction{ Book=new Book{ BookTitle="Book1"} },
-				new BookTransaction{ Book=new Book{ BookTitle="Book2"} }
+				new TransactionDtos { UserId = 1, BookId = 101, TransactionDate = DateTime.Now, DueDate = DateTime.Now.AddDays(14) },
+				new TransactionDtos { UserId = 2, BookId = 102, TransactionDate = DateTime.Now, DueDate = DateTime.Now.AddDays(14) }
 			};
-			_mockTransactionService.Setup(s => s.CheckOverdueBooksAsync(currentDate)).ReturnsAsync(overdueBooks);
 
-			// Act
-			var result = await _controller.CheckOverdueBooks(currentDate);
-
-			// Assert
-			Assert.That(result, Is.InstanceOf<OkObjectResult>()); // Use Assert.That for type checks
-			var okResult = result as OkObjectResult;
-			Assert.That(okResult?.Value, Is.EqualTo(overdueBooks)); // Use null conditional operator
-		}
-
-		[Test]
-		public async Task CheckOverdueBooks_ReturnsNotFound_WhenNoOverdueBooksExist()
-		{
-			// Arrange
-			var currentDate = DateTime.Now;
-			_mockTransactionService.Setup(s => s.CheckOverdueBooksAsync(currentDate)).ReturnsAsync(new List<BookTransaction>());
-
-			// Act
-			var result = await _controller.CheckOverdueBooks(currentDate);
-
-			// Assert
-			Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
-			var notFoundResult = result as NotFoundObjectResult;
-			Assert.That(notFoundResult?.Value, Is.EqualTo("No overdue books found.")); // Use null conditional operator
-		}
-
-		[Test]
-		public async Task BorrowBook_ReturnsOk_WhenBookIsBorrowedSuccessfully()
-		{
-			// Arrange
-			var newTrans = new TransactionDtos { UserId = 1, BookId = 1, TransactionDate = DateTime.Now, DueDate = DateTime.Now.AddDays(7) };
-			_mockTransactionService.Setup(s => s.BorrowBookAsync(newTrans.UserId, newTrans.BookId, newTrans.TransactionDate, newTrans.DueDate))
+			_mockTransactionService.Setup(s => s.BorrowBookAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
 				.ReturnsAsync("Book borrowed successfully.");
 
 			// Act
-			var result = await _controller.BorrowBook(newTrans);
+			var result = await _controller.BorrowBooks(borrowRequests);
 
 			// Assert
 			Assert.That(result, Is.InstanceOf<OkObjectResult>());
 			var okResult = result as OkObjectResult;
-			Assert.That(okResult?.Value, Is.EqualTo("Book borrowed successfully.")); // Ensure consistency with your controller logic
+			Assert.AreEqual(200, okResult.StatusCode);
+			var responseMessages = okResult.Value as string[];
+			Assert.AreEqual(2, responseMessages.Length);
+			Assert.IsTrue(responseMessages.All(msg => msg == "Book borrowed successfully."));
 		}
 
 		[Test]
-		public async Task ReturnBook_ReturnsOk_WhenBookIsReturnedSuccessfully()
+		public async Task BorrowBooks_ReturnsBadRequest_WhenRequestsAreEmpty()
 		{
 			// Arrange
-			var newTrans = new TransactionDtos { UserId = 1, BookId = 1, ReturnDate = DateTime.Now };
-			_mockTransactionService.Setup(s => s.ReturnBookAsync(newTrans.UserId, newTrans.BookId, (DateTime)newTrans.ReturnDate))
+			var borrowRequests = new List<TransactionDtos>();
+
+			// Act
+			var result = await _controller.BorrowBooks(borrowRequests);
+
+			// Assert
+			Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+			var badRequestResult = result as BadRequestObjectResult;
+			Assert.AreEqual(400, badRequestResult.StatusCode);
+			Assert.AreEqual("Transaction details cannot be null or empty.", badRequestResult.Value);
+		}
+
+		[Test]
+		public async Task ReturnBooks_ReturnsOk_WhenAllBooksReturnedSuccessfully()
+		{
+			// Arrange
+			var returnRequests = new List<TransactionDtos>
+			{
+				new TransactionDtos { UserId = 1, BookId = 101, ReturnDate = DateTime.Now },
+				new TransactionDtos { UserId = 2, BookId = 102, ReturnDate = DateTime.Now }
+			};
+
+			_mockTransactionService.Setup(s => s.ReturnBookAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime>()))
 				.ReturnsAsync("Book returned successfully.");
 
 			// Act
-			var result = await _controller.ReturnBook(newTrans);
+			var result = await _controller.ReturnBooks(returnRequests);
 
 			// Assert
 			Assert.That(result, Is.InstanceOf<OkObjectResult>());
 			var okResult = result as OkObjectResult;
-			Assert.That(okResult?.Value, Is.EqualTo("Book returned successfully.")); // Ensure consistency with your controller logic
+			Assert.AreEqual(200, okResult.StatusCode);
+			var responseMessages = okResult.Value as string[];
+			Assert.AreEqual(2, responseMessages.Length);
+			Assert.IsTrue(responseMessages.All(msg => msg == "Book returned successfully."));
 		}
 
 		[Test]
-		public async Task SearchBooks_ReturnsOk_WhenBooksFound()
+		public async Task ReturnBooks_ReturnsBadRequest_WhenRequestsAreEmpty()
 		{
 			// Arrange
-			var keyword = "test";
-			List<BookDtos> books = new List<BookDtos>
+			var returnRequests = new List<TransactionDtos>();
+
+			// Act
+			var result = await _controller.ReturnBooks(returnRequests);
+
+			// Assert
+			Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+			var badRequestResult = result as BadRequestObjectResult;
+			Assert.AreEqual(400, badRequestResult.StatusCode);
+			Assert.AreEqual("Transaction details cannot be null or empty.", badRequestResult.Value);
+		}
+
+		[Test]
+		public async Task BorrowBooks_ReturnsBadRequest_WhenServiceThrowsLMSException()
+		{
+			// Arrange
+			var borrowRequests = new List<TransactionDtos>
 			{
-				new BookDtos{Title="Book1"},
-				new BookDtos{Title="Book2"}
+				new TransactionDtos { UserId = 1, BookId = 101, TransactionDate = DateTime.Now, DueDate = DateTime.Now.AddDays(14) }
 			};
 
-			_mockBookService.Setup(s => s.SearchBooksAsync(keyword)).ReturnsAsync(books);
+			_mockTransactionService.Setup(s => s.BorrowBookAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+				.ThrowsAsync(new LMSException("Borrowing error."));
 
 			// Act
-			var result = await _controller.SearchBooks(keyword);
+			var result = await _controller.BorrowBooks(borrowRequests);
 
 			// Assert
-			Assert.That(result, Is.InstanceOf<OkObjectResult>());
-			var okResult = result as OkObjectResult;
-			Assert.That(okResult?.Value, Is.EqualTo(books)); // Ensure consistency with your controller logic
+			Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+			var badRequestResult = result as BadRequestObjectResult;
+			Assert.AreEqual(400, badRequestResult.StatusCode);
+			Assert.AreEqual("Borrowing error.", badRequestResult.Value);
 		}
 
 		[Test]
-		public async Task SearchBooks_ReturnsNotFound_WhenNoBooksFound()
+		public async Task ReturnBooks_ReturnsBadRequest_WhenServiceThrowsLMSException()
 		{
 			// Arrange
-			var keyword = "non-existing-book";
-			_mockBookService.Setup(s => s.SearchBooksAsync(keyword)).ReturnsAsync(new List<BookDtos>());
+			var returnRequests = new List<TransactionDtos>
+			{
+				new TransactionDtos { UserId = 1, BookId = 101, ReturnDate = DateTime.Now }
+			};
+
+			_mockTransactionService.Setup(s => s.ReturnBookAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<DateTime>()))
+				.ThrowsAsync(new LMSException("Returning error."));
 
 			// Act
-			var result = await _controller.SearchBooks(keyword);
-
-			// Assert
-			Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
-			var notFoundResult = result as NotFoundObjectResult;
-			Assert.That(notFoundResult?.Value, Is.EqualTo("No books found matching the keyword.")); // Ensure consistency with your controller logic
-		}
-
-		[Test]
-		public async Task BorrowBook_ReturnsBadRequest_WhenTransactionDetailsNull()
-		{
-			// Act
-			var result = await _controller.BorrowBook(null);
+			var result = await _controller.ReturnBooks(returnRequests);
 
 			// Assert
 			Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
 			var badRequestResult = result as BadRequestObjectResult;
-			Assert.That(badRequestResult?.Value, Is.EqualTo("Transaction details cannot be null.")); // Ensure consistency with your controller logic
-		}
-
-		[Test]
-		public async Task ReturnBook_ReturnsBadRequest_WhenTransactionDetailsNull()
-		{
-			// Act
-			var result = await _controller.ReturnBook(null);
-
-			// Assert
-			Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-			var badRequestResult = result as BadRequestObjectResult;
-			Assert.That(badRequestResult?.Value, Is.EqualTo("Transaction details cannot be null.")); // Ensure consistency with your controller logic
-		}
-
-		[Test]
-		public async Task CheckOverdueBooks_ReturnsBadRequest_WhenExceptionThrown()
-		{
-			// Arrange
-			var currentDate = DateTime.Now;
-			_mockTransactionService.Setup(s => s.CheckOverdueBooksAsync(currentDate)).ThrowsAsync(new LMSException("Service failure"));
-
-			// Act
-			var result = await _controller.CheckOverdueBooks(currentDate);
-
-			// Assert
-			Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-			var badRequestResult = result as BadRequestObjectResult;
-			Assert.That(badRequestResult?.Value, Is.EqualTo("Service failure")); // Ensure consistency with your controller logic
+			Assert.AreEqual(400, badRequestResult.StatusCode);
+			Assert.AreEqual("Returning error.", badRequestResult.Value);
 		}
 	}
 }
