@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using LMS.Interfaces.RepoInterface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IReservationServices, ReservationServices>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
@@ -71,7 +73,6 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI(options =>
 	{
 		options.DefaultModelsExpandDepth(-1);
-		//options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 	});
 }
 app.UseAuthentication();

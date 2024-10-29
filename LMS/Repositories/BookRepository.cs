@@ -27,19 +27,16 @@ namespace LMS.Repositories
 		public async Task AddAsync(Book book)
 		{
 			await _context.Books.AddAsync(book);
-			//await _context.SaveChangesAsync();
 		}
 
 		public void Update(Book book)
 		{
 			_context.Books.Update(book);
-			//_context.SaveChanges();
 		}
 
 		public void Remove(Book book)
 		{
 			_context.Books.Remove(book);
-			//_context.SaveChanges();
 		}
 
 	}

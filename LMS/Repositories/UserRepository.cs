@@ -28,24 +28,20 @@ namespace LMS.Repositories
 		public async Task AddAsync(User user)
 		{
 			await _context.Users.AddAsync(user);
-			//await _context.SaveChangesAsync();
 		}
 
 		public void Update(User user)
 		{
 			_context.Users.Update(user);
-			//_context.SaveChanges();
 		}
 
 		public void Remove(User user)
 		{
 			_context.Users.Remove(user);
-			//_context.SaveChanges();
 		}
 		public async Task AddUserLoginAsync(UserLogin user)
 		{
 			await _context.UserLogins.AddAsync(user);
-			//await _context.SaveChangesAsync();
 		}
 	}
 }

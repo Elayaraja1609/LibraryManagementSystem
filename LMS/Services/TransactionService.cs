@@ -142,11 +142,7 @@ namespace LMS.Services
 				{
 					book.IsAvailable = true;
 				}
-				//var rel = AddTransAsync(trans);
-				//if(await rel > 0)
-				//{
-				//	book.BookQty--;
-				//}
+				
 				await UpdateTransAsync(trans.Id, trans);
 				await _unitOfWork.CompleteAsync();
 

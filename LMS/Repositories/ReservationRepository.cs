@@ -27,19 +27,16 @@ namespace LMS.Repositories
 		public async Task AddAsync(Reservation res)
 		{
 			await _context.Reservations.AddAsync(res);
-			//await _context.SaveChangesAsync();
 		}
 
 		public void Update(Reservation res)
 		{
 			_context.Reservations.Update(res);
-			//_context.SaveChanges();
 		}
 
 		public void Remove(Reservation res)
 		{
 			_context.Reservations.Remove(res);
-			//_context.SaveChanges();
 		}
 
 	}

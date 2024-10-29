@@ -28,19 +28,16 @@ namespace LMS.Repositories
 		{
 
 			await _context.Authors.AddAsync(author);
-			//await _context.SaveChangesAsync();
 		}
 
 		public void Update(Author author)
 		{
 			_context.Authors.Update(author);
-			//_context.SaveChanges();
 		}
 
 		public void Remove(Author author)
 		{
 			_context.Authors.Remove(author);
-			//_context.SaveChanges();
 		}
 
 	}
