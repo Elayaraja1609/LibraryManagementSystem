@@ -1,9 +1,8 @@
 ﻿using LMS.DTOs;
 using LMS.Exceptions;
 using LMS.Interfaces.ServicesInterface;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using System.Collections.Concurrent;
 
 namespace LMS.Controllers
 {
@@ -13,13 +12,11 @@ namespace LMS.Controllers
 	{
 		private readonly ITransactionService _bookTransService;
 		private readonly IBookService _bookService;
-		private readonly IUserServices _userService;
 
-		public UsersController(ITransactionService bookTransService, IBookService bookService, IUserServices userService)
+		public UsersController(ITransactionService bookTransService, IBookService bookService)
 		{
 			_bookTransService = bookTransService;
 			_bookService = bookService;
-			_userService = userService;
 		}
 
 		[HttpGet("overdue-books/{currentDate}")]
@@ -46,61 +43,47 @@ namespace LMS.Controllers
 		}
 
 		[HttpPost("borrow-books")]
-		public async Task<IActionResult> BorrowBooks([FromBody] List<TransactionDtos> borrowRequests)
+		public async Task<string[]> BorrowBooks([FromBody] List<TransactionDtos> borrowRequests)
 		{
-			if (borrowRequests == null || !borrowRequests.Any())
-			{
-				return BadRequest("Transaction details cannot be null or empty.");
-			}
+			var results = new ConcurrentBag<string>();
 
-			try
+			// Run each borrowing operation in parallel
+			Parallel.ForEach(borrowRequests, request =>
 			{
-				var tasks = borrowRequests.Select(async request =>
+				try
 				{
-					return await _bookTransService.BorrowBookAsync(request.UserId, request.BookId, request.TransactionDate, request.DueDate);
-				});
+					// Call BorrowBookAsync in parallel
+					var result = _bookTransService.BorrowBookAsync(request.UserId, request.BookId, request.TransactionDate, request.DueDate).Result;
+					results.Add(result);
+				}
+				catch (Exception ex)
+				{
+					results.Add($"Failed to borrow book with ID {request.BookId} for user {request.UserId}: {ex.Message}");
+				}
+			});
 
-				var results = await Task.WhenAll(tasks);
-
-				return Ok(results);
-			}
-			catch (LMSException ex)
-			{
-				return BadRequest(ex.Message);
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to borrow books: " + ex.Message);
-			}
+			return results.ToArray();
 		}
 
 		[HttpPost("return-books")]
-		public async Task<IActionResult> ReturnBooks([FromBody] List<TransactionDtos> returnRequests)
+		public async Task<string[]> ReturnBooks([FromBody] List<TransactionDtos> returnRequests)
 		{
-			if (returnRequests == null || !returnRequests.Any())
-			{
-				return BadRequest("Transaction details cannot be null or empty.");
-			}
+			var results = new ConcurrentBag<string>();
 
-			try
+			// Run each borrowing operation in parallel
+			Parallel.ForEach(returnRequests, request =>
 			{
-				var tasks = returnRequests.Select(async request =>
+				try
 				{
-					return await _bookTransService.ReturnBookAsync(request.UserId, request.BookId, (DateTime)request.ReturnDate);
-				});
-
-				var results = await Task.WhenAll(tasks);
-
-				return Ok(results);
-			}
-			catch (LMSException ex)
-			{
-				return BadRequest(ex.Message);
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to return books: " + ex.Message);
-			}
+					var result = _bookTransService.ReturnBookAsync(request.UserId, request.BookId, (DateTime)request.ReturnDate).Result;
+					results.Add(result);
+				}
+				catch (Exception ex)
+				{
+					results.Add($"Failed to return book with ID {request.BookId} for user {request.UserId}: {ex.Message}");
+				}
+			});
+			return results.ToArray();
 		}
 
 		[HttpGet("search-book")]
@@ -130,5 +113,6 @@ namespace LMS.Controllers
 				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to search for books: " + ex.Message);
 			}
 		}
+
 	}
 }

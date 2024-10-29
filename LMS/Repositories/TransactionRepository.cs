@@ -14,29 +14,10 @@ namespace LMS.Repositories
 			_context = context;
 		}
 
-		public async Task<BookTransaction?> GetByIdAsync(int id)
-		{
-			return await _context.Transactions.FindAsync(id);
-		}
 
 		public async Task<IEnumerable<BookTransaction>> GetAllAsync()
 		{
 			return await _context.Transactions.ToListAsync();
-		}
-
-		public async Task AddAsync(BookTransaction trans)
-		{
-			await _context.Transactions.AddAsync(trans);
-		}
-
-		public void Update(BookTransaction trans)
-		{
-			_context.Transactions.Update(trans);
-		}
-
-		public void Remove(BookTransaction trans)
-		{
-			_context.Transactions.Remove(trans);
 		}
 
 	}
