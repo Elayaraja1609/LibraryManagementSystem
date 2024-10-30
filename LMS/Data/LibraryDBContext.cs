@@ -132,6 +132,7 @@ namespace LMS.Data
 				entity.HasOne(d => d.Role).WithMany(p => p.Users)
 					.HasForeignKey(d => d.RoleId)
 					.HasConstraintName("FK__Users__RoleId__5812160E");
+     				entity.HasData(new User { Firstname="Admin",Lastname="",Username="admin",Password="admin",Email="",Contact="",Address="",RoleId=1,Active=true});
 			});
 			modelBuilder.Entity<UserLogin>(entity =>
 			{
