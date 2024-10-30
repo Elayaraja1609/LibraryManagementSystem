@@ -2,9 +2,15 @@
  This project is a Library Management System built with ASP.NET Core Web API and Entity Framework Core (EF Core 8), using SQL Server as the database. The system allows management of library books, authors, and users, with CRUD operations and default seeded data for initial setup.
 
  ## Key Features ✨
+---
+***NOTE :***
+
+By default added username - admin and password - admin to authorized to do the admin functionality
+
+---
  * Admin -> 
     Admin can do the below functionalities
-    * Book Management: Add, update, delete, and retrieve books.
+    * Book Management: Add, update, delete, retrieve, and search books.
     * User Management: Add, update, delete, and retrieve users.
     * Author Management: Store and manage author details.
 * Users -> From User prespective 
@@ -59,6 +65,7 @@ dotnet run
 
 ## Default Seeded Data
 The application starts with some default categories, such as Fiction, Non-Fiction, Science, History, Biography, and more. This data is automatically seeded in the Category table upon migration.
+By default added the username - admin and password - admin and do the authorization
 
 ## Usage
 * Once the application is running, open your browser and go to:
