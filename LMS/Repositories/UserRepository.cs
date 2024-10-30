@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Repositories
 {
-	public class UserRepository : IUserRepository
+	public class UserRepository : IRepository<User>, IUserRepository
 	{
 		private readonly LibraryDBContext _context;
 

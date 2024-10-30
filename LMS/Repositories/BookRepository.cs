@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Repositories
 {
-	public class BookRepository : IBookRepository
+	public class BookRepository : IRepository<Book>
 	{
 		private readonly LibraryDBContext _context;
 

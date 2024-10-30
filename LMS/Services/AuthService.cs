@@ -52,7 +52,7 @@ namespace LMS.Services
 				UserLoginDate = DateTime.Now
 			};
 
-			await _unitOfWork.Users.AddUserLoginAsync(userlogin);
+			await _unitOfWork.Users1.AddUserLoginAsync(userlogin);
 			await _unitOfWork.CompleteAsync();
 
 
@@ -61,7 +61,7 @@ namespace LMS.Services
 		public async Task<string?> GenerateJwtToken(int userId, int? roleId)
 		{
 			var roles = await _unitOfWork.Roles.GetAllAsync();
-			var matchedRole = roles.Where(x => x.Id == roleId).Select(x => x.RoleName).ToString();
+			var matchedRole = roles.Where(x => x.Id == roleId).ToList();
 
 			var tokenHandler = new JwtSecurityTokenHandler();
 			var jwtSettings = _configuration.GetSection("JwtSettings");
@@ -71,7 +71,8 @@ namespace LMS.Services
 			var claims1 = new List<Claim>
 			{
 				new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-				new("userid",userId.ToString())
+				new("userid",userId.ToString()),
+				new("role",matchedRole[0].RoleName.ToString()),
 			};
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{

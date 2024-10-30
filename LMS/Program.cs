@@ -13,26 +13,28 @@ using LMS.Interfaces.RepoInterface;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthentication(x =>
-{
-	x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-	x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-	x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(x =>
-{
-	var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-	x.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(options =>
 	{
-		ValidIssuer = jwtSettings["Issuer"],
-		ValidAudience = jwtSettings["Audience"],
-		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]!)),
-		ValidateIssuer = true,
-		ValidateAudience = true,
-		ValidateLifetime = true,
-		ValidateIssuerSigningKey = true
-	};
+		var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidateAudience = true,
+			ValidateLifetime = true,
+			ValidateIssuerSigningKey = true,
+			ValidIssuer = jwtSettings["Issuer"],           // match your "iss" field
+			ValidAudience = jwtSettings["Audience"],     // match your "aud" field
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]!)) // Use a strong secret key
+		};
+	});
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+	options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
+	options.AddPolicy("AdminOrUserPolicy", policy =>
+		policy.RequireRole("Admin", "User"));
 });
-builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<LibraryDBContext>(options =>
 				options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -41,7 +43,6 @@ builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IReservationServices, ReservationServices>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
-builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 

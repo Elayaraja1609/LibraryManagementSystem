@@ -1,6 +1,7 @@
 ﻿using LMS.DTOs;
 using LMS.Exceptions;
 using LMS.Interfaces.ServicesInterface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
 
@@ -20,6 +21,7 @@ namespace LMS.Controllers
 		}
 
 		[HttpGet("overdue-books/{currentDate}")]
+		[Authorize(Policy = "AdminOrUserPolicy")]
 		public async Task<IActionResult> CheckOverdueBooks([FromRoute] DateTime currentDate)
 		{
 			try
@@ -43,6 +45,7 @@ namespace LMS.Controllers
 		}
 
 		[HttpPost("borrow-books")]
+		[Authorize(Policy = "AdminOrUserPolicy")]
 		public async Task<string[]> BorrowBooks([FromBody] List<TransactionDtos> borrowRequests)
 		{
 			var results = new ConcurrentBag<string>();
@@ -66,6 +69,7 @@ namespace LMS.Controllers
 		}
 
 		[HttpPost("return-books")]
+		[Authorize(Policy = "AdminOrUserPolicy")]
 		public async Task<string[]> ReturnBooks([FromBody] List<TransactionDtos> returnRequests)
 		{
 			var results = new ConcurrentBag<string>();
@@ -87,6 +91,7 @@ namespace LMS.Controllers
 		}
 
 		[HttpGet("search-book")]
+		[Authorize(Policy = "AdminOrUserPolicy")]
 		public async Task<IActionResult> SearchBooks([FromQuery] string keyword)
 		{
 			if (string.IsNullOrWhiteSpace(keyword))

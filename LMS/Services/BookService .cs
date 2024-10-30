@@ -24,8 +24,8 @@ namespace LMS.Services
 				Image=b.BookImg,
 				PageCount=b.PageCount,
 				Price=b.BookPrice,
-				AuthorName=b.Author != null?b.Author.AuthorName:b.AuthorId.ToString(),
-				PublishedYear=b.BookPublishedYear,
+				AuthorName = GetAuthorNameByIdAsync(b.AuthorId).ToString(),
+				PublishedYear =b.BookPublishedYear,
 				Publisher = b.Publisher,
 				BookQty=b.BookQty,
 				IsAvailable=b.IsAvailable
@@ -90,6 +90,11 @@ namespace LMS.Services
 			var book = await _unitOfWork.Books.GetByIdAsync(bookId);
 			return book;
 		}
+		private async Task<string?> GetAuthorNameByIdAsync(int? id)
+		{
+			var authors = await _unitOfWork.Authors.GetAllAsync();
+			return authors.Where(x => x.Id == id).Select(s => s.AuthorName).ToString();
+		}
 		public async Task<IEnumerable<BookDtos>> SearchBooksAsync(string keyword)
 		{
 			var books = await _unitOfWork.Books.GetAllAsync();
@@ -100,12 +105,12 @@ namespace LMS.Services
 				Image = b.BookImg,
 				PageCount = b.PageCount,
 				Price = b.BookPrice,
-				AuthorName = b.Author != null ? b.Author.AuthorName : b.AuthorId.ToString(),
+				AuthorName = GetAuthorNameByIdAsync(b.AuthorId).ToString(),
 				PublishedYear = b.BookPublishedYear,
 				Publisher = b.Publisher,
 				BookQty = b.BookQty,
 				IsAvailable = b.IsAvailable
-			});
+			});;
 		}
 	}
 }

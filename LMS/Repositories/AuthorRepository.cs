@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Repositories
 {
-	public class AuthorRepository : IAuthorRepository
+	public class AuthorRepository : IRepository<Author>
 	{
 		private readonly LibraryDBContext _context;
 

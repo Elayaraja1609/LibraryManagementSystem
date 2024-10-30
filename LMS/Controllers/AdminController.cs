@@ -1,6 +1,7 @@
 ﻿using LMS.DTOs;
 using LMS.Exceptions;
 using LMS.Interfaces.ServicesInterface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -23,6 +24,7 @@ namespace LMS.Controllers
 
 		[HttpGet("authors")]
 		[SwaggerOperation(Summary = "Get all authors", Tags = new[] { "Author" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> GetAuthors()
 		{
 			try
@@ -46,6 +48,7 @@ namespace LMS.Controllers
 		}
 		[HttpPost("authors")]
 		[SwaggerOperation(Summary = "Add a new author", Tags = new[] { "Author" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> AddAuthor([FromBody] AuthorDto newAuthor)
 		{
 			try
@@ -70,6 +73,7 @@ namespace LMS.Controllers
 		}
 		[HttpPut("authors/{id}")]
 		[SwaggerOperation(Summary = "Update an existing author", Tags = new[] { "Author" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> UpdateAuthor(int id, [FromBody] AuthorDto updatedAuthor)
 		{
 			try
@@ -99,6 +103,7 @@ namespace LMS.Controllers
 		}
 		[HttpDelete("authors/{id}")]
 		[SwaggerOperation(Summary = "Delete an author", Tags = new[] { "Author" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> DeleteAuthor(int id)
 		{
 			try
@@ -125,6 +130,7 @@ namespace LMS.Controllers
 		#region Book
 		[HttpGet("books")]
 		[SwaggerOperation(Summary = "Get all books", Tags = new[] { "Book" })]
+		[Authorize(Policy = "AdminOrUserPolicy")]
 		public async Task<IActionResult> GetBooks()
 		{
 			try
@@ -149,6 +155,7 @@ namespace LMS.Controllers
 
 		[HttpPost("books")]
 		[SwaggerOperation(Summary = "Add a new book", Tags = new[] { "Book" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> AddBook([FromBody] BookDtos bookDto)
 		{
 			try
@@ -173,6 +180,7 @@ namespace LMS.Controllers
 		}
 		[HttpPut("books/{id}")]
 		[SwaggerOperation(Summary = "Update an existing book", Tags = new[] { "Book" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> updateBook(int id, [FromBody] BookDtos bookDto)
 		{
 			try
@@ -203,6 +211,7 @@ namespace LMS.Controllers
 
 		[HttpDelete("books/{id}")]
 		[SwaggerOperation(Summary = "Delete a book", Tags = new[] { "Book" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> deleteBook(int id)
 		{
 			try
@@ -227,6 +236,7 @@ namespace LMS.Controllers
 		
 		[HttpGet("search-book")]
 		[SwaggerOperation(Summary = "Search books", Tags = new[] { "Book" })]
+		[Authorize(Policy = "AdminOrUserPolicy")]
 		public async Task<IActionResult> SearchBooks([FromQuery] string keyword)
 		{
 			try
@@ -258,6 +268,7 @@ namespace LMS.Controllers
 		#region User
 		[HttpGet("users")]
 		[SwaggerOperation(Summary = "Get all users", Tags = new[] { "User" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> GetAll()
 		{
 			try
@@ -281,6 +292,7 @@ namespace LMS.Controllers
 		}
 		[HttpPost("users")]
 		[SwaggerOperation(Summary = "Add a new user", Tags = new[] { "User" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> AddUser([FromBody] UserDtos updatedUser)
 		{
 			try
@@ -305,6 +317,7 @@ namespace LMS.Controllers
 		}
 		[HttpPut("users/{id}")]
 		[SwaggerOperation(Summary = "Update an existing user", Tags = new[] { "User" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> Update(int id, [FromBody] UserDtos updatedUser)
 		{
 			try
@@ -334,6 +347,7 @@ namespace LMS.Controllers
 		}
 		[HttpDelete("users/{id}")]
 		[SwaggerOperation(Summary = "Delete a user", Tags = new[] { "User" })]
+		[Authorize(Policy = "AdminPolicy")]
 		public async Task<IActionResult> Delete(int id)
 		{
 			try

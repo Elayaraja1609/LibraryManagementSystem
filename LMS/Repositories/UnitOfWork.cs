@@ -16,6 +16,7 @@ namespace LMS.Repositories
 			_context = context;
 			Books = new BookRepository(_context);
 			Users = new UserRepository(_context);
+			Users1 = new UserRepository(_context);
 			Reservations = new ReservationRepository(_context);
 			Authors = new AuthorRepository(_context);
 			BookTransactions = new TransactionRepository(_context);
@@ -23,12 +24,13 @@ namespace LMS.Repositories
 
 		}
 
-		public IBookRepository Books { get; private set; }
-		public IUserRepository Users { get; private set; }
-		public IReservationRepository Reservations { get; private set; }
-		public IAuthorRepository Authors { get; private set; }
-		public ITransactionRepository BookTransactions { get; private set; }
-		public IRoleRepository Roles { get; private set; }
+		public IRepository<Book> Books { get; private set; }
+		public IRepository<User> Users { get; private set; }
+		public IUserRepository Users1 { get; private set; }
+		public IRepository<Reservation> Reservations { get; private set; }
+		public IRepository<Author> Authors { get; private set; }
+		public IGetAllRepository<BookTransaction> BookTransactions { get; private set; }
+		public IGetAllRepository<Role> Roles { get; private set; }
 		public async Task<int> CompleteAsync()
 		{
 			await _dbSemaphore.WaitAsync();

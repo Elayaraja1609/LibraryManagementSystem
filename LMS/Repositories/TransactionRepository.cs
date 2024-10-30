@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Repositories
 {
-	public class TransactionRepository : ITransactionRepository
+	public class TransactionRepository : IGetAllRepository<BookTransaction>
 	{
 		private readonly LibraryDBContext _context;
 

@@ -6,12 +6,13 @@ namespace LMS.Interfaces
 {
 	public interface IUnitOfWork : IDisposable
 	{
-		IBookRepository Books { get; }
-		IUserRepository Users { get; }
-		IRoleRepository Roles { get; }
-		IReservationRepository Reservations { get; }
-		IAuthorRepository Authors { get; }
-		ITransactionRepository BookTransactions { get; }
+		IRepository<Book> Books { get; }
+		IRepository<User> Users { get; }
+		IUserRepository Users1 { get; }
+		IGetAllRepository<Role> Roles { get; }
+		IRepository<Reservation> Reservations { get; }
+		IRepository<Author> Authors { get; }
+		IGetAllRepository<BookTransaction> BookTransactions { get; }
 		Task<int> CompleteAsync();
 	}
 

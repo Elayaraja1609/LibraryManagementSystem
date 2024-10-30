@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LMS.Repositories
 {
-	public class RoleRepository: IRoleRepository
+	public class RoleRepository: IGetAllRepository<Role>
 	{
 		private readonly LibraryDBContext _context;
 
