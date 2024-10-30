@@ -8,6 +8,7 @@
 By default added username - admin and password - admin to authorized to do the admin functionality
 
 ---
+ * Auth - > Implemented the role-based jwt token authentication and authorization.
  * Admin -> 
     Admin can do the below functionalities
     * Book Management: Add, update, delete, retrieve, and search books.
