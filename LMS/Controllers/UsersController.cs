@@ -46,48 +46,32 @@ namespace LMS.Controllers
 
 		[HttpPost("borrow-books")]
 		[Authorize(Policy = "AdminOrUserPolicy")]
-		public async Task<string[]> BorrowBooks([FromBody] List<TransactionDtos> borrowRequests)
+		public async Task<IActionResult> BorrowBooks([FromBody] List<TransactionDtos> borrowRequests)
 		{
-			var results = new ConcurrentBag<string>();
+			if (borrowRequests == null || !borrowRequests.Any())
+				return BadRequest("Borrow request cannot be null or empty.");
 
-			// Run each borrowing operation in parallel
-			Parallel.ForEach(borrowRequests, request =>
-			{
-				try
-				{
-					// Call BorrowBookAsync in parallel
-					var result = _bookTransService.BorrowBookAsync(request.UserId, request.BookId, request.TransactionDate, request.DueDate).Result;
-					results.Add(result);
-				}
-				catch (Exception ex)
-				{
-					results.Add($"Failed to borrow book with ID {request.BookId} for user {request.UserId}: {ex.Message}");
-				}
-			});
+			var result = await _bookTransService.BorrowBooksAsync(borrowRequests);
 
-			return results.ToArray();
+			if (result.All(r => r == "Book borrowed successfully."))
+				return Ok(result);
+			else
+				return StatusCode(500, result);
 		}
 
 		[HttpPost("return-books")]
 		[Authorize(Policy = "AdminOrUserPolicy")]
-		public async Task<string[]> ReturnBooks([FromBody] List<TransactionDtos> returnRequests)
+		public async Task<IActionResult> ReturnBooks([FromBody] List<TransactionDtos> returnRequests)
 		{
-			var results = new ConcurrentBag<string>();
+			if (returnRequests == null || !returnRequests.Any())
+				return BadRequest("Return request cannot be null or empty.");
 
-			// Run each borrowing operation in parallel
-			Parallel.ForEach(returnRequests, request =>
-			{
-				try
-				{
-					var result = _bookTransService.ReturnBookAsync(request.UserId, request.BookId, (DateTime)request.ReturnDate).Result;
-					results.Add(result);
-				}
-				catch (Exception ex)
-				{
-					results.Add($"Failed to return book with ID {request.BookId} for user {request.UserId}: {ex.Message}");
-				}
-			});
-			return results.ToArray();
+			var result = await _bookTransService.ReturnBooksAsync(returnRequests);
+
+			if (result.All(r => r == "Book returned successfully."))
+				return Ok(result);
+			else
+				return StatusCode(500, result);
 		}
 
 		[HttpGet("search-book")]

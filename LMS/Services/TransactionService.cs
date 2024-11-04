@@ -1,4 +1,5 @@
-﻿using LMS.Interfaces;
+﻿using LMS.DTOs;
+using LMS.Interfaces;
 using LMS.Interfaces.ServicesInterface;
 using LMS.Models;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,45 @@ namespace LMS.Services
 			var trans = await _unitOfWork.BookTransactions.GetAllAsync();
 			return trans.Where(r => r.DueDate <= currentDate && r.status).ToList();
 		}
-		public async Task<string> BorrowBookAsync(int userId, int bookId,DateTime borrowDt,DateTime dueDt)
+
+		// Handles multiple borrow requests in parallel
+		public async Task<List<string>> BorrowBooksAsync(List<TransactionDtos> transactions)
+		{
+			List<string> results = new List<string>();
+
+			// Process each transaction concurrently
+			var tasks = transactions.Select(transaction => Task.Run(async () =>
+			{
+				// Borrow book logic
+				var result = await BorrowBookAsync(transaction.UserId, transaction.BookId, transaction.TransactionDate, transaction.DueDate);
+				lock (results)
+				{
+					results.Add(result);
+				}
+			})).ToArray();
+
+			await Task.WhenAll(tasks);
+			return results;
+		}
+
+		// Handles multiple return requests in parallel
+		public async Task<List<string>> ReturnBooksAsync(List<TransactionDtos> transactions)
+		{
+			List<string> results = new List<string>();
+
+			var tasks = transactions.Select(transaction => Task.Run(async () =>
+			{
+				var result = await ReturnBookAsync(transaction.UserId, transaction.BookId, (DateTime)transaction.ReturnDate);
+				lock (results)
+				{
+					results.Add(result);
+				}
+			})).ToArray();
+
+			await Task.WhenAll(tasks);
+			return results;
+		}
+		private async Task<string> BorrowBookAsync(int userId, int bookId,DateTime borrowDt,DateTime dueDt)
 		{
 			string result = null;
 			using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -56,7 +95,7 @@ namespace LMS.Services
 			return result;
 		}
 
-		public async Task<string> ReturnBookAsync(int userId, int bookId, DateTime returnDt)
+		private async Task<string> ReturnBookAsync(int userId, int bookId, DateTime returnDt)
 		{
 			string result = null;
 			using (SqlConnection conn = new SqlConnection(_connectionString))
